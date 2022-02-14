@@ -1,5 +1,8 @@
 module FieldDistributionNonuniformMedium
 
-# Write your package code here.
+using ProgressMeter
+
+include("simulation.jl")
+# include("utils.jl")
 
 end
