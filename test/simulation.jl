@@ -31,6 +31,9 @@
     # # simulator #
     # #############
 
+    s = Simulator(nx=nx, ny=ny)
+    simulate!(s)
+
     s = Simulator(grid, light, permittivity, permeability)
     simulate!(s)
 end

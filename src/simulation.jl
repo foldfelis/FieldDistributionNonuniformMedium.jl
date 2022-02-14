@@ -168,12 +168,12 @@ function Simulator(;
     max_x=3e-6, max_y=10e-6, max_t=5e-12,
     nx=300, ny=1000,
     λ=2.04e-6,
-    n=rand(1:5), r=0.45e-6,
-    μ=1.
+    ϵ = 9., μ = 1.,
+    ndefect=rand(1:5), r=0.45e-6,
 )
-    grid = Grid(nx, ny, max_x, max_y, max_t)
+    grid = Grid(max_x, max_y, max_t, nx, ny)
     light = Light(λ)
-    permittivity = rand(Permittivity, n, r, grid)
+    permittivity = Permittivity(ϵ, grid)
     permeability = Permeability(μ, grid)
 
     return Simulator(grid, light, permittivity, permeability)
