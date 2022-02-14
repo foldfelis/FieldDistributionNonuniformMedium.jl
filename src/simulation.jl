@@ -135,7 +135,7 @@ mutable struct Simulator{T<:AbstractArray}
     t::Int
 end
 
-function get_default_e_field(light::Light, grid::Grid)
+function get_default_e_field(light::Light, grid::Grid; t=1)
     max_x, nx, Δx = grid.max_x, grid.nx, grid.Δx
     Δt = grid.Δt
     k = light.k
@@ -143,7 +143,7 @@ function get_default_e_field(light::Light, grid::Grid)
     return 0.1 * exp.(
         -(Δx * ((2:nx) .- nx/2)).^2 ./
         (max_x/4)^2
-    ) * sin(k * C*Δt)
+    ) * sin(k * C*Δt*t)
 end
 
 function Simulator(grid::Grid, light::Light, permittivity::Permittivity, permeability::Permeability)
@@ -160,7 +160,7 @@ function Simulator(grid::Grid, light::Light, permittivity::Permittivity, permeab
         zeros(Float64, size(grid)),
         zeros(Float64, size(grid)),
 
-        0
+        1
     )
 end
 
@@ -180,11 +180,13 @@ function Simulator(;
 end
 
 function next!(s::Simulator)
+    s.t += 1
+    
     nx, ny = size(s.grid)
     ϵx, ϵy = s.permittivity.ϵx, s.permittivity.ϵy
     μx, μy = s.permeability.μx, s.permeability.μy
 
-    s.ez[2:nx, 1] .+= get_default_e_field(s.light, s.grid)
+    s.ez[2:nx, 1] .+= get_default_e_field(s.light, s.grid, t=s.t)
 
     s.hx[2:(nx-1), 2:(ny-1)] .+= -μx*(s.ez[2:(nx-1), 2:(ny-1)] - s.ez[2:(nx-1), 1:(ny-2)])
     s.hy[2:(nx-1), 2:(ny-1)] .+= +μy*(s.ez[2:(nx-1), 2:(ny-1)] - s.ez[1:(nx-2), 2:(ny-1)])
@@ -193,8 +195,6 @@ function next!(s::Simulator)
         ϵx[2:(nx-1), 2:(ny-1)].*(s.hy[3:nx, 2:(ny-1)] - s.hy[2:(nx-1), 2:(ny-1)]) -
         ϵy[2:(nx-1), 2:(ny-1)].*(s.hx[2:(nx-1), 3:ny] - s.hx[2:(nx-1), 2:(ny-1)])
 
-    s.t += 1
-
     return s
 end
 
@@ -202,7 +202,7 @@ function simulate!(s::Simulator)
     nt = s.grid.nt
 
     p = Progress(nt)
-    for _ in 1:nt
+    for _ in 2:nt
         next!(s)
         ProgressMeter.next!(p)
     end
