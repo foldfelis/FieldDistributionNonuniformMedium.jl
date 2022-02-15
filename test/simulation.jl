@@ -17,6 +17,15 @@
     @test boundary(grid) == (max_x, max_y)
 end
 
+@testset "Light" begin
+    λ = 2.04e-6
+
+    light = Light(λ)
+
+    @test light.λ == λ
+    @test light.k == 2π/λ
+end
+
 @testset "simulation" begin
     # ##########
     # # const. #
