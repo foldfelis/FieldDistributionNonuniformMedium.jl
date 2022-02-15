@@ -1,3 +1,22 @@
+@testset "grid" begin
+    max_x = 3e-6
+    max_y = 10e-6
+    max_t = 5e-12
+
+    nx = 60
+    ny = 200
+
+    grid = Grid(max_x, max_y, max_t, nx, ny)
+
+    @test size(grid) == (nx, ny)
+    @test size(grid, 1) == nx
+    @test size(grid, 2) == ny
+    @test axes(grid) == (Base.OneTo(nx), Base.OneTo(ny))
+    @test axes(grid, 1) == Base.OneTo(nx)
+    @test axes(grid, 2) == Base.OneTo(ny)
+    @test boundary(grid) == (max_x, max_y)
+end
+
 @testset "simulation" begin
     # ##########
     # # const. #
