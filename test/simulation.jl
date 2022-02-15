@@ -47,6 +47,27 @@ end
     @test all_eq(permittivity.ϵy)
 end
 
+@testset "permeability" begin
+    max_x = 3e-6
+    max_y = 10e-6
+    max_t = 5e-12
+
+    nx = 60
+    ny = 200
+
+    μ = 1.
+
+    grid = Grid(max_x, max_y, max_t, nx, ny)
+    permeability = Permeability(μ, grid)
+
+    @test permeability.μ[1] == μ
+    @test permeability.μx[1] == C * grid.Δt/grid.Δx / μ
+    @test permeability.μy[1] == C * grid.Δt/grid.Δy / μ
+    @test all_eq(permeability.μ)
+    @test all_eq(permeability.μx)
+    @test all_eq(permeability.μy)
+end
+
 @testset "simulation" begin
     # ##########
     # # const. #
