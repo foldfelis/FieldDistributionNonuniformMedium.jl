@@ -6,15 +6,31 @@
     nx = 60
     ny = 200
 
+    Δx = max_x / nx
+    Δy = max_y / ny
+
+    Δt = 1 / C / √(1/Δx^2 + 1/Δy^2)
+    nt = round(Int, max_t/Δt)
+
+    axes_x = Δx * (Base.OneTo(nx) .- nx/2)
+    axes_y = Δy * (Base.OneTo(ny) .- Δy/2)
+
     grid = Grid(max_x, max_y, max_t, nx, ny)
+
+    @test grid.Δx == Δx
+    @test grid.Δy == Δy
+    @test grid.Δt == Δt
+    @test grid.nt == nt
 
     @test size(grid) == (nx, ny)
     @test size(grid, 1) == nx
     @test size(grid, 2) == ny
-    @test axes(grid) == (Base.OneTo(nx), Base.OneTo(ny))
-    @test axes(grid, 1) == Base.OneTo(nx)
-    @test axes(grid, 2) == Base.OneTo(ny)
+    @test axes(grid) == (axes_x, axes_y)
+    @test axes(grid, 1) == axes_x
+    @test axes(grid, 2) == axes_y
     @test boundary(grid) == (max_x, max_y)
+    @test boundary(grid, 1) == max_x
+    @test boundary(grid, 2) == max_y
 end
 
 @testset "Light" begin

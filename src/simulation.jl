@@ -41,18 +41,21 @@ function Grid(max_x, max_y, max_t, nx, ny)
 end
 
 function build(grid::Grid)
-    Δx, Δy, nx, ny = grid.Δx, grid.Δy, grid.nx, grid.ny
-
     return cat(
-        repeat(Δx * ((1:nx) .- nx/2), 1, ny, 1),
-        repeat(Δy * (transpose(1:ny) .- Δy/2), nx, 1, 1),
+        repeat(axes(grid, 1), 1, size(grid, 2), 1),
+        repeat(axes(grid, 2)', size(grid, 1), 1, 1),
         dims=3
     )
 end
 
 Base.size(grid::Grid) = (grid.nx, grid.ny)
 Base.size(grid::Grid, d) = d::Integer <= 2 ? size(grid)[d] : 1
-Base.axes(grid::Grid) = (Base.OneTo(grid.nx), Base.OneTo(grid.ny))
+function Base.axes(grid::Grid)
+    axes_x = grid.Δx * (Base.OneTo(grid.nx) .- grid.nx/2)
+    axes_y = grid.Δy * (Base.OneTo(grid.ny) .- grid.Δy/2)
+
+    return (axes_x, axes_y)
+end
 Base.axes(grid::Grid, d) = d::Integer <= 2 ? axes(grid)[d] : 1
 boundary(grid::Grid) = (grid.max_x, grid.max_y)
 boundary(grid::Grid, d) = d::Integer <= 2 ? boundary(grid)[d] : 1
@@ -137,19 +140,18 @@ mutable struct Simulator{T<:AbstractArray}
 end
 
 function get_default_e_field(light::Light, grid::Grid; t=1)
-    max_x, nx, Δx = grid.max_x, grid.nx, grid.Δx
     Δt = grid.Δt
     k = light.k
 
     return 0.1 * exp.(
-        -(Δx * ((2:nx) .- nx/2)).^2 ./
-        (max_x/4)^2
+        -axes(grid, 1)[2:end].^2 ./
+        (boundary(grid, 1)/4)^2
     ) * sin(k * C*Δt*t)
 end
 
 function Simulator(grid::Grid, light::Light, permittivity::Permittivity, permeability::Permeability)
     ez = zeros(Float64, size(grid))
-    ez[2:grid.nx, 1] .= get_default_e_field(light, grid)
+    ez[2:end, 1] .= get_default_e_field(light, grid)
 
     return Simulator(
         grid,
