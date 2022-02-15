@@ -26,6 +26,27 @@ end
     @test light.k == 2π/λ
 end
 
+@testset "permittivity" begin
+    max_x = 3e-6
+    max_y = 10e-6
+    max_t = 5e-12
+
+    nx = 60
+    ny = 200
+
+    ϵ = 9.
+
+    grid = Grid(max_x, max_y, max_t, nx, ny)
+    permittivity = Permittivity(ϵ, grid)
+
+    @test permittivity.ϵ[1] == ϵ
+    @test permittivity.ϵx[1] == C * grid.Δt/grid.Δx / ϵ
+    @test permittivity.ϵy[1] == C * grid.Δt/grid.Δy / ϵ
+    @test all_eq(permittivity.ϵ)
+    @test all_eq(permittivity.ϵx)
+    @test all_eq(permittivity.ϵy)
+end
+
 @testset "simulation" begin
     # ##########
     # # const. #
@@ -59,9 +80,9 @@ end
     # # simulator #
     # #############
 
-    s = Simulator(nx=nx, ny=ny)
-    simulate!(s)
+    # s = Simulator(nx=nx, ny=ny)
+    # simulate!(s)
 
-    s = Simulator(grid, light, permittivity, permeability)
-    simulate!(s)
+    # s = Simulator(grid, light, permittivity, permeability)
+    # simulate!(s)
 end
