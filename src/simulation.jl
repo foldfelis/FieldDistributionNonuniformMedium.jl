@@ -109,15 +109,16 @@ end
 #     return implant(Tϵ, xs, ys, rs, grid)
 # end
 
-struct Permeability{T<:Real}
+struct Permeability{T<:AbstractMatrix}
     μ::T
     μx::T
     μy::T
 end
 
-function Permeability(μ, grid::Grid)
-    μx = C * grid.Δt/grid.Δx / μ
-    μy = C * grid.Δt/grid.Δy / μ
+function Permeability(μ_const::Real, grid::Grid)
+    μ = μ_const * ones(size(grid))
+    μx = C * grid.Δt/grid.Δx ./ μ
+    μy = C * grid.Δt/grid.Δy ./ μ
 
     return Permeability(μ, μx, μy)
 end
@@ -181,15 +182,15 @@ end
 
 function next!(s::Simulator)
     s.t += 1
-    
+
     nx, ny = size(s.grid)
     ϵx, ϵy = s.permittivity.ϵx, s.permittivity.ϵy
     μx, μy = s.permeability.μx, s.permeability.μy
 
     s.ez[2:nx, 1] .+= get_default_e_field(s.light, s.grid, t=s.t)
 
-    s.hx[2:(nx-1), 2:(ny-1)] .+= -μx*(s.ez[2:(nx-1), 2:(ny-1)] - s.ez[2:(nx-1), 1:(ny-2)])
-    s.hy[2:(nx-1), 2:(ny-1)] .+= +μy*(s.ez[2:(nx-1), 2:(ny-1)] - s.ez[1:(nx-2), 2:(ny-1)])
+    s.hx[2:(nx-1), 2:(ny-1)] .+= -μx[2:(nx-1), 2:(ny-1)] .* (s.ez[2:(nx-1), 2:(ny-1)] - s.ez[2:(nx-1), 1:(ny-2)])
+    s.hy[2:(nx-1), 2:(ny-1)] .+= +μy[2:(nx-1), 2:(ny-1)] .*(s.ez[2:(nx-1), 2:(ny-1)] - s.ez[1:(nx-2), 2:(ny-1)])
 
     s.ez[2:(nx-1), 2:(ny-1)] .+=
         ϵx[2:(nx-1), 2:(ny-1)].*(s.hy[3:nx, 2:(ny-1)] - s.hy[2:(nx-1), 2:(ny-1)]) -
