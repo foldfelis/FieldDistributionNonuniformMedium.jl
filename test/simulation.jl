@@ -31,6 +31,12 @@
     @test boundary(grid) == (max_x, max_y)
     @test boundary(grid, 1) == max_x
     @test boundary(grid, 2) == max_y
+
+    @test build(grid) == cat(
+        repeat(axes_x, 1, ny, 1),
+        repeat(axes_y', nx, 1, 1),
+        dims=3
+    )
 end
 
 @testset "Light" begin
