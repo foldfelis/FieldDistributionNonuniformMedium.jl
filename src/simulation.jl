@@ -104,14 +104,6 @@ function implant!(permittivity::Permittivity, ϵ_const::Real, xs::AbstractVector
     return permittivity
 end
 
-# function Base.rand(Tϵ::Type{Permittivity}, n::Integer, r::Real, grid::Grid)
-#     xs = grid.max_x .* rand(n)
-#     ys = grid.max_y .* rand(n)
-#     rs = r .* rand(n)
-
-#     return implant(Tϵ, xs, ys, rs, grid)
-# end
-
 struct Permeability{T<:AbstractMatrix}
     μ::T
     μx::T
