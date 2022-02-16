@@ -28,14 +28,3 @@ julia> plot_e_field(s)
 ```
 
 ![](assets/demo.png)
-
-## Index
-
-```@index
-```
-
-## APIs
-
-```@autodocs
-Modules = [FieldDistributionNonuniformMedium]
-```
