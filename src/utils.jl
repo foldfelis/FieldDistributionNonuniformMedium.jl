@@ -1,4 +1,3 @@
-
 using Plots.PlotMeasures
 using Plots
 
@@ -7,8 +6,6 @@ export
     plot_e_field
 
 function plot_ϵ(s::Simulator; figsize=(600, 750), left_margin=-100px)
-    plotly()
-
     ϵ = s.permittivity.ϵ
 
     return heatmap(
@@ -19,8 +16,6 @@ function plot_ϵ(s::Simulator; figsize=(600, 750), left_margin=-100px)
 end
 
 function plot_e_field(s::Simulator; figsize=(600, 750), left_margin=-100px)
-    plotly()
-
     ez = s.ez
     ϵ = s.permittivity.ϵ
 
