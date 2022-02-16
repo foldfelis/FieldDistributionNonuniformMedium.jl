@@ -1,7 +1,7 @@
 @testset "grid" begin
     max_x = 3e-6
     max_y = 10e-6
-    max_t = 5e-12
+    max_t = 0.1e-12
 
     nx = 60
     ny = 200
@@ -45,7 +45,7 @@ end
 @testset "permittivity" begin
     max_x = 3e-6
     max_y = 10e-6
-    max_t = 5e-12
+    max_t = 0.1e-12
 
     nx = 60
     ny = 200
@@ -85,7 +85,7 @@ end
 @testset "permeability" begin
     max_x = 3e-6
     max_y = 10e-6
-    max_t = 5e-12
+    max_t = 0.1e-12
 
     nx = 60
     ny = 200
@@ -110,7 +110,7 @@ end
 
     max_x = 3e-6
     max_y = 10e-6
-    max_t = 5e-12
+    max_t = 0.1e-12
 
     nx = 60
     ny = 200

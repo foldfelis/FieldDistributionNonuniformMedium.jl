@@ -297,7 +297,7 @@ function Simulator(grid::Grid, light::Light, permittivity::Permittivity, permeab
 end
 
 function Simulator(;
-    max_x=3e-6, max_y=10e-6, max_t=5e-12,
+    max_x=3e-6, max_y=10e-6, max_t=0.1e-12,
     nx=300, ny=1000,
     λ=2.04e-6,
     ϵ = 9., μ = 1.
