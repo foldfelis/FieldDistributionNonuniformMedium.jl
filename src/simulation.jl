@@ -30,6 +30,25 @@ struct Grid{T<:Real}
     max_t::T
 end
 
+"""
+    Grid(max_x, max_y, max_t, nx, ny)
+
+Construct a discretization grid for computational domain.
+
+## Arguments
+
+* `max_x`: Linear sizes of first computational domain in meters.
+* `max_y`: Linear sizes of second computational domain in meters.
+* `max_t`: Maximum computational time in seconds.
+* `nx`: Number of discretization grid for first computational domain.
+* `ny`: Number of discretization grid for second computational domain.
+
+## Example
+
+```jldoctest
+julia> Grid(3e-6, 10e-6, 1e-12, 60, 200);
+```
+"""
 function Grid(max_x, max_y, max_t, nx, ny)
     Δx = max_x / nx
     Δy = max_y / ny
@@ -65,6 +84,21 @@ struct Light{T<:Real}
     k::T
 end
 
+"""
+    Light(λ)
+
+Construct a light to propagate.
+
+## Arguments
+
+* `λ`: Wavelength of the light in meters.
+
+## Example
+
+```jldoctest
+julia> Light(2.04e-6);
+```
+"""
 function Light(λ)
     return Light(λ, 2π/λ)
 end
@@ -75,6 +109,24 @@ struct Permittivity{T<:AbstractMatrix}
     ϵy::T
 end
 
+"""
+    Permittivity(ϵ_const::Real, grid::Grid)
+
+Construct a uniform permittivity for the medium.
+
+## Arguments
+
+* `ϵ_const`: Permittivity of the medium in F/m.
+* `grid`: Discretization grid.
+
+## Example
+
+```jldoctest
+julia> grid = Grid(3e-6, 10e-6, 1e-12, 60, 200);
+
+julia> Permittivity(9., grid);
+```
+"""
 function Permittivity(ϵ_const::Real, grid::Grid)
     ϵ = ϵ_const * ones(size(grid))
     ϵx = C * grid.Δt/grid.Δx ./ ϵ
@@ -83,7 +135,51 @@ function Permittivity(ϵ_const::Real, grid::Grid)
     return Permittivity(ϵ, ϵx, ϵy)
 end
 
-function implant!(permittivity::Permittivity, ϵ_const::Real, xs::AbstractVector, ys::AbstractVector, rs::AbstractVector, grid::Grid)
+"""
+    implant!(
+        permittivity::Permittivity, ϵ_const::Real,
+        xs::AbstractVector, ys::AbstractVector, rs::AbstractVector,
+        grid::Grid
+    )
+
+Implant some bubble defect into the medium.
+
+## Arguments
+
+* `permittivity`: Permittivity object.
+* `ϵ_const`: Permittivity of the defect in F/m.
+* `xs`: Position of defect of first computational domain in meters.
+* `ys`: Position of defect of second computational domain in meters.
+* `rs`: Radius of defect in meters.
+* `grid`: Discretization grid.
+
+## Example
+
+```jldoctest
+julia> grid = Grid(3e-6, 10e-6, 1e-12, 60, 200);
+
+julia> permittivity = Permittivity(9., grid);
+
+julia> ϵ_defect = 1.;
+
+julia> xs_defect = [0, 1e-6, -1e-6];
+
+julia> ys_defect = [1e-6, 2e-6, 3e-6];
+
+julia> rs_defect = [0.5e-6, 0.1e-6, 0.2e-6];
+
+julia> implant!(
+           permittivity, ϵ_defect,
+           xs_defect, ys_defect, rs_defect,
+           grid
+       );
+```
+"""
+function implant!(
+    permittivity::Permittivity, ϵ_const::Real,
+    xs::AbstractVector, ys::AbstractVector, rs::AbstractVector,
+    grid::Grid
+)
     length(xs) == length(ys) == length(rs) || throw(DimensionMismatch("xs, ys, rs must have same length"))
 
     in_circle(i, j) = true in [
@@ -110,6 +206,24 @@ struct Permeability{T<:AbstractMatrix}
     μy::T
 end
 
+"""
+    Permeability(μ_const::Real, grid::Grid)
+
+Construct a uniform permeability for the medium.
+
+## Arguments
+
+* `μ_const`: Permeability of the medium in N/A².
+* `grid`: Discretization grid.
+
+## Example
+
+```jldoctest
+julia> grid = Grid(3e-6, 10e-6, 1e-12, 60, 200);
+
+julia> Permeability(1., grid);
+```
+"""
 function Permeability(μ_const::Real, grid::Grid)
     μ = μ_const * ones(size(grid))
     μx = C * grid.Δt/grid.Δx ./ μ
@@ -141,6 +255,29 @@ function get_default_e_field(light::Light, grid::Grid; t=1)
     ) * sin(k * C*Δt*t)
 end
 
+"""
+    Simulator(grid::Grid, light::Light, permittivity::Permittivity, permeability::Permeability)
+
+## Arguments
+
+* `grid`: Discretization grid for computational domain.
+* `light`: Light to propagate.
+* `permittivity`: Permittivity for the medium.
+* `permeability`: Permeability for the medium.
+
+## Example
+
+```jldoctest
+julia> grid = Grid(3e-6, 10e-6, 1e-12, 60, 200);
+
+julia> light = Light(2.04e-6);
+
+julia> permittivity = Permittivity(9., grid);
+
+julia> permeability = Permeability(1., grid);
+
+julia> Simulator(grid, light, permittivity, permeability);
+"""
 function Simulator(grid::Grid, light::Light, permittivity::Permittivity, permeability::Permeability)
     ez = zeros(Float64, size(grid))
     ez[2:end, 1] .= get_default_e_field(light, grid)
@@ -191,11 +328,36 @@ function next!(s::Simulator)
     return s
 end
 
+"""
+    simulate!(s::Simulator)
+
+Run simulation from current `t` to `max_t`
+
+## Arguments
+
+* `s`: Simulator.
+
+## Example
+
+```julia
+julia> grid = Grid(3e-6, 10e-6, 1e-12, 60, 200);
+
+julia> light = Light(2.04e-6);
+
+julia> permittivity = Permittivity(9., grid);
+
+julia> permeability = Permeability(1., grid);
+
+julia> s = Simulator(grid, light, permittivity, permeability);
+
+julia> simulate!(s);
+```
+"""
 function simulate!(s::Simulator)
     nt = s.grid.nt
 
     p = Progress(nt)
-    for _ in 2:nt
+    for _ in (s.t+1):nt
         next!(s)
         ProgressMeter.next!(p)
     end
