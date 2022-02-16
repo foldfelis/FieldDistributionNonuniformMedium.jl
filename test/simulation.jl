@@ -61,6 +61,25 @@ end
     @test all_eq(permittivity.ϵ)
     @test all_eq(permittivity.ϵx)
     @test all_eq(permittivity.ϵy)
+
+    ϵ_defect = 1.
+    xs_defect = [0, 1e-6, -1e-6]
+    ys_defect = [1e-6, 2e-6, 3e-6]
+    rs_defect = [0.5e-6, 0.1e-6, 0.2e-6]
+    implant!(permittivity, ϵ_defect, xs_defect, ys_defect, rs_defect, grid)
+
+    in_circle(i, j) = true in [
+        √(
+            (axes(grid, 1)[i] - xs_defect[c])^2 +
+            (axes(grid, 2)[j] - ys_defect[c])^2
+        ) < rs_defect[c]
+        for c in 1:length(rs_defect)
+    ]
+
+    @test all(
+        in_circle(i, j) ? permittivity.ϵ[i, j] == ϵ_defect : permittivity.ϵ[i, j] == ϵ
+        for i in 1:size(grid, 1), j in 1:size(grid, 2)
+    )
 end
 
 @testset "permeability" begin

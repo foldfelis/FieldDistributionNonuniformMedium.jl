@@ -6,7 +6,7 @@ export
     Light,
 
     Permittivity,
-    implant,
+    implant!,
 
     Permeability,
 
@@ -83,26 +83,26 @@ function Permittivity(ϵ_const::Real, grid::Grid)
     return Permittivity(ϵ, ϵx, ϵy)
 end
 
-# function implant(::Type{Permittivity}, xs::AbstractVector, ys::AbstractVector, rs::AbstractVector, grid::Grid)
-#     ϵ = 9 * ones(size(grid))
+function implant!(permittivity::Permittivity, ϵ_const::Real, xs::AbstractVector, ys::AbstractVector, rs::AbstractVector, grid::Grid)
+    length(xs) == length(ys) == length(rs) || throw(DimensionMismatch("xs, ys, rs must have same length"))
 
-#     length(xs) == length(ys) == length(rs) || throw(DimensionMismatch("xs, ys, rs must have same length"))
+    in_circle(i, j) = true in [
+        √(
+            (axes(grid, 1)[i] - xs[c])^2 +
+            (axes(grid, 2)[j] - ys[c])^2
+        ) < rs[c]
+        for c in 1:length(xs)
+    ]
 
-#     n = length(xs)
+    for i in 1:size(grid, 1), j in 1:size(grid, 2)
+        in_circle(i, j) && (permittivity.ϵ[i, j] = ϵ_const)
+    end
 
-#     in_circle(i, j) = true in [
-#         √((i*grid.Δx - xs[c])^2 + (j*grid.Δy - ys[c])^2) < rs[c] for c in 1:n
-#     ]
+    permittivity.ϵx .= C * grid.Δt/grid.Δx ./ permittivity.ϵ
+    permittivity.ϵy .= C * grid.Δt/grid.Δy ./ permittivity.ϵ
 
-#     for i in 1:grid.nx, j in 1:grid.ny
-#         in_circle(i, j) && (ϵ[i, j] = 1)
-#     end
-
-#     ϵx = C * grid.Δt/grid.Δx ./ ϵ
-#     ϵy = C * grid.Δt/grid.Δy ./ ϵ
-
-#     return Permittivity(ϵ, ϵx, ϵy)
-# end
+    return permittivity
+end
 
 # function Base.rand(Tϵ::Type{Permittivity}, n::Integer, r::Real, grid::Grid)
 #     xs = grid.max_x .* rand(n)
