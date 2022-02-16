@@ -10,13 +10,13 @@
 The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
-```julia-REPL
+```julia
 pkg> add https://github.com/foldfelis/FieldDistributionNonuniformMedium.jl
 ```
 
 ## Quick start
 
-```julia-REPL
+```julia
 julia> using FieldDistributionNonuniformMedium
 
 julia> s = Simulator();
