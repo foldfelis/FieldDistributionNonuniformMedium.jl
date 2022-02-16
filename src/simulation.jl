@@ -59,14 +59,6 @@ function Grid(max_x, max_y, max_t, nx, ny)
     return Grid(nx, ny, nt, Δx, Δy, Δt, max_x, max_y, max_t)
 end
 
-function build(grid::Grid)
-    return cat(
-        repeat(axes(grid, 1), 1, size(grid, 2), 1),
-        repeat(axes(grid, 2)', size(grid, 1), 1, 1),
-        dims=3
-    )
-end
-
 Base.size(grid::Grid) = (grid.nx, grid.ny)
 Base.size(grid::Grid, d) = d::Integer <= 2 ? size(grid)[d] : 1
 function Base.axes(grid::Grid)
@@ -78,6 +70,14 @@ end
 Base.axes(grid::Grid, d) = d::Integer <= 2 ? axes(grid)[d] : 1
 boundary(grid::Grid) = (grid.max_x, grid.max_y)
 boundary(grid::Grid, d) = d::Integer <= 2 ? boundary(grid)[d] : 1
+
+function build(grid::Grid)
+    return cat(
+        repeat(axes(grid, 1), 1, size(grid, 2), 1),
+        repeat(axes(grid, 2)', size(grid, 1), 1, 1),
+        dims=3
+    )
+end
 
 struct Light{T<:Real}
     λ::T
